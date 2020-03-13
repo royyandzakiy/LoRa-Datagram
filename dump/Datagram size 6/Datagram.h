@@ -4,7 +4,7 @@
 // #include "globals.h"
 
 const int N_NODES = 3;
-const int DATAGRAM_SIZE = 3;
+const int DATAGRAM_SIZE = 6;
 
 class Datagram {
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,counter,counter;" (nanti ganti counter dengan datetime)
@@ -34,15 +34,15 @@ class Datagram {
    
   public:
     Datagram();
-    Datagram(String, String, String);
+    Datagram(String, String, String, String, String, String);
     Datagram(String);
     void stringToStringArrayParser(String, String[DATAGRAM_SIZE]);
-    void set(String, String, String);
+    void set(String, String, String, String, String, String);
     void set_from_string(String);
     String get_to_string();
     void print_to_string();
     
-    String hopFrom, rssi, alertStatus;
+    String nodeId, hopFrom, rssi, alertStatus, datetimeSent, datetimeReceived;
 };
 
 #endif
