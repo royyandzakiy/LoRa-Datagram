@@ -6,11 +6,12 @@
 const int N_NODES = 3;
 const int DATAGRAM_SIZE = 6;
 
-class Datagram {  
+class Datagram {
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,counter,counter;" (nanti ganti counter dengan datetime)
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,datetimeSent,datetimeReceived;" (nanti ganti counter dengan datetime)
   // DATAGRAM TABLE FORMAT (array): [ datagram[0], datagram[1], ... }
-  // DATAGRAM TABLE FORMAT (json): { "nodeId": [{"n":hopFrom, "r":rssi}, {...}] }  
+  // DATAGRAM FORMAT (JSON): {"hopFrom": hopFrom, "rssi": rssi, "alertStatus": alertStatus}
+  // DATAGRAM TABLE FORMAT (json): { "nodeId": [datagram_nodeId1, datagram_nodeId2, ..., datagram_nodeIdN] }  
 
   /*
    * Note:

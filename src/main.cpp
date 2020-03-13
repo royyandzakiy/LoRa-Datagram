@@ -48,18 +48,40 @@ void lora_setup() {
   Serial.println((String) nodeId);
 }
 
-void send_packet() {
-  // ubah paket menjadi datagramtable
-  DatagramTable tempDatagramTable(0); // ukuran array of Datagram sudah di declare pada class
+DatagramTable myDatagramTable(nodeId);
 
+void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = tempDatagramTable.get_to_string();
+  String datagramTableString = myDatagramTable.get_to_string();
   Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
   LoRa.beginPacket();
   LoRa.print(datagramTableString);
   LoRa.endPacket();
+}
+
+void retrieve_packet() {
+  // received a packet
+  Serial.print("nodeId " + (String) nodeId + " Received datagram: '");
+
+  // read packet
+  while (LoRa.available()) {
+    // masukkan ke dalam format      
+    String datagramTableString = LoRa.readString();
+    Serial.print(datagramTableString); 
+  }
+
+  // print RSSI of packet
+  Serial.print("' with RSSI ");
+  Serial.println(LoRa.packetRssi());
+}
+
+void listen_packet() {
+  int packetSize = LoRa.parsePacket(); // watchdog
+  if (packetSize) {
+    retrieve_packet();
+  }
 }
 
 void setup() {
@@ -72,6 +94,7 @@ void setup() {
 
 void loop() {
   send_packet();  
-  counter++;
+  listen_packet();
+  // counter++;
   delay(200);
 }
