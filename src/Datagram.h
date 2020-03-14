@@ -1,7 +1,8 @@
 #ifndef Datagram_h
 #define Datagram_h
 
-// #include "globals.h"
+#include <Arduino.h>
+#include <ArduinoJson.h>
 
 const int N_NODES = 3;
 const int DATAGRAM_SIZE = 3;
@@ -34,15 +35,17 @@ class Datagram {
    
   public:
     Datagram();
+    Datagram(int, int, int);
     Datagram(String, String, String);
     Datagram(String);
-    void stringToStringArrayParser(String, String[DATAGRAM_SIZE]);
+    void stringToJsonParser(String, JsonObject);
+    void set(int, int, int);
     void set(String, String, String);
     void set_from_string(String);
     String get_to_string();
     void print_to_string();
     
-    String hopFrom, rssi, alertStatus;
+    int hopFrom, rssi, alertStatus;
 };
 
 #endif

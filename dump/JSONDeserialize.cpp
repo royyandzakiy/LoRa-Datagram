@@ -49,6 +49,8 @@ void setup() {
     // Lastly, you can print the resulting JSON to a String
     String output;
     serializeJson(doc, output);
+
+    Serial.println(output);
 }
 
 void loop() {

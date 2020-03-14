@@ -10,11 +10,11 @@ class DatagramTable {
     Datagram datagrams[N_NODES];
     
     void copy(DatagramTable);
-    void update(DatagramTable, String);
+    void update(DatagramTable, int);
     void print();
     String get_to_string();
 
-    String nodeId;
+    int nodeId;
 };
 
 #endif
