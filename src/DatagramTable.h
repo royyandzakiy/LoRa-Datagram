@@ -6,9 +6,10 @@
 // CLASS DATAGRAM TABLE
 class DatagramTable {
   public:
-    DatagramTable(int);
+    DatagramTable();
     Datagram datagrams[N_NODES];
     
+    void nodeId_set(int);
     void copy(DatagramTable);
     void update(DatagramTable, int);
     void print();

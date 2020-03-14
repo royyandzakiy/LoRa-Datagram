@@ -7,16 +7,18 @@ Datagram::Datagram() {
   alertStatus = 0;
 }
 
-void Datagram::stringToJsonParser(String stringToParse, JsonObject outputJson) {
+void Datagram::set_from_string(String stringToParse) {
   // parser
   DynamicJsonDocument doc(1024);
 
   deserializeJson(doc, stringToParse);
   JsonObject obj = doc.to<JsonObject>();
 
-  outputJson["hopFrom"] = obj["hopFrom"];
-  outputJson["rssi"] = obj["rssi"];
-  outputJson["alertStatus"] = obj["alertStatus"];
+  hopFrom = obj["hopFrom"];
+  rssi = obj["rssi"];
+  alertStatus = obj["alertStatus"];
+
+  obj.clear();
 }
 
 Datagram::Datagram(int _hopFrom, int _rssi, int _alertStatus) {
@@ -31,12 +33,7 @@ Datagram::Datagram(String _hopFrom, String _rssi, String _alertStatus) {
 
 Datagram::Datagram(String stringToParse) {
   // parser
-  DynamicJsonDocument doc(1024);
-  JsonObject obj = doc.to<JsonObject>();
-
-  stringToJsonParser(stringToParse, obj);
-
-  Datagram(obj["hopFrom"], obj["rssi"], obj["alertStatus"]);
+  set_from_string(stringToParse);
 }
 
 void Datagram::set(int _hopFrom, int _rssi, int _alertStatus) {
@@ -49,21 +46,11 @@ void Datagram::set(String _hopFrom, String _rssi, String _alertStatus) {
   set(_hopFrom.toInt(), _rssi.toInt(), _alertStatus.toInt());
 }
 
-void Datagram::set_from_string(String stringToParse) {
-  // parser
-  DynamicJsonDocument doc(1024);
-  JsonObject obj = doc.to<JsonObject>();
-
-  stringToJsonParser(stringToParse, obj);
-
-  Datagram(obj["hopFrom"], obj["rssi"], obj["alertStatus"]);
-}
-
 String Datagram::get_to_string() {
-  String tempDatagramString;
-  tempDatagramString = "{\"hopFrom\":" + (String) hopFrom + ",\"rssi\":" + (String) rssi + ",\"alertStatus\":" + (String) alertStatus + "}";
+  String tempDatagramJsonString;
+  tempDatagramJsonString = "{\"hopFrom\":" + (String) hopFrom + ",\"rssi\":" + (String) rssi + ",\"alertStatus\":" + (String) alertStatus + "}";
   
-  return tempDatagramString;
+  return tempDatagramJsonString;
 }
 
 void Datagram::print_to_string() {

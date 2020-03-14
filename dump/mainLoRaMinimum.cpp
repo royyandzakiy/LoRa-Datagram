@@ -43,15 +43,13 @@ void lora_setup() {
 
   // cari tau nodeId diri sendiri
   nodeId = (int) EEPROM.read(EEPROM_ADDRESS_NODEID);
-  Serial.println("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: " + (String) nodeId);
+  Serial.print("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: ");
+  Serial.println((String) nodeId);
 }
-
-// DatagramTable harus di declare disini
-DatagramTable datagramTable;
 
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = datagramTable.get_to_string();
+  String datagramTableString = myDatagramTable.get_to_string();
   Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
@@ -67,17 +65,13 @@ void retrieve_packet() {
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String raw = LoRa.readString();
-    Serial.print(raw);
-
-    // print RSSI of packet
-    Serial.print("' with RSSI ");
-    Serial.println(LoRa.packetRssi());
-
-    // parse string to Json
-
-    // update current datagramTable
+    String datagramTableString = LoRa.readString();
+    Serial.print(datagramTableString); 
   }
+
+  // print RSSI of packet
+  Serial.print("' with RSSI ");
+  Serial.println(LoRa.packetRssi());
 }
 
 void listen_packet() {
@@ -95,9 +89,7 @@ void setup() {
   lora_setup();
 }
 
-void loop() {  
-    datagramTable.nodeId_set(nodeId);
-    send_packet();
-    listen_packet();
-    delay(1000);
+void loop() {
+  // counter++;
+  delay(200);
 }

@@ -20,6 +20,8 @@ void setup() {
     String tempDatagram;
     serializeJson(docOut, tempDatagram);
 
+    obj.clear();
+
     Serial.println(tempDatagram);
 }
 

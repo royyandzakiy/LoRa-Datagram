@@ -12,7 +12,7 @@ class Datagram {
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,datetimeSent,datetimeReceived;" (nanti ganti counter dengan datetime)
   // DATAGRAM TABLE FORMAT (array): [ datagram[0], datagram[1], ... }
   // DATAGRAM FORMAT (JSON): {"hopFrom": hopFrom, "rssi": rssi, "alertStatus": alertStatus}
-  // DATAGRAM TABLE FORMAT (json): { "nodeId": [datagram_nodeId1, datagram_nodeId2, ..., datagram_nodeIdN] }  
+  // DATAGRAM TABLE FORMAT (json): { nodeId: [datagram_nodeId1, datagram_nodeId2, ..., datagram_nodeIdN] }  
 
   /*
    * Note:
