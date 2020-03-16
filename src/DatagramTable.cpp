@@ -17,7 +17,11 @@ void DatagramTable::nodeId_set(int _nodeId) {
   for (int i=0; i<N_NODES; i++) {
     // jika posisi datagram ada pada self, maka value default dari hopFrom adalah 255
     boolean self = (i==nodeId-1);
-    if (self) datagrams[i].hopFrom = 255;
+    if (self) {
+      datagrams[i].nodeId = nodeId;
+      datagrams[i].hopFrom = 255;
+      datagrams[i].rssi = 255;
+    }
   }
 }
 
@@ -69,6 +73,7 @@ void DatagramTable::update(DatagramTable _datagramTable, int _rssi) {
   int nodeIdSender = _datagramTable.nodeId;
 
   // update diagramTable antara self dengan nodeId pengirim
+  datagrams[nodeIdSender-1].nodeId = nodeIdSender;
   datagrams[nodeIdSender-1].hopFrom = nodeIdSender;
   datagrams[nodeIdSender-1].rssi = _rssi;
 

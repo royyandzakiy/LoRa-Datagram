@@ -20,6 +20,7 @@ const int EEPROM_SIZE = 1; // ESP32 max 512, Arduino Uno max 1024
 const int EEPROM_ADDRESS_NODEID = 0; // tempat penyimpanan NODEID
 
 int nodeId;
+unsigned long lastSecond;
 
 void lora_setup() {
   Serial.println("=== LoRa Setup ===");
@@ -62,22 +63,29 @@ void send_packet() {
 
 void retrieve_packet() {
   // received a packet
-  Serial.print("nodeId " + (String) nodeId + " Received datagram: '");
-
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String raw = LoRa.readString();
-    Serial.print(raw);
+    String datagramTableStringPacket = LoRa.readString();
 
     // print RSSI of packet
-    Serial.print("' with RSSI ");
-    Serial.println(LoRa.packetRssi());
+    int rssiPacket = LoRa.packetRssi();
+
+    Serial.println("=== Received then Updated DatagramTable state ===");
+    Serial.print("nodeId " + (String) nodeId + " Received datagram ");
+    Serial.print("with RSSI ");
+    Serial.println((String) rssiPacket);
+
+    Serial.println("packet : " + datagramTableStringPacket);
 
     // parse string to datagramTable
-    // DatagramTable tempDatagramTable();
+    DatagramTable tempDatagramTable(datagramTableStringPacket);
 
     // update current datagramTable
+    datagramTable.update(tempDatagramTable, rssiPacket);
+    Serial.print("updated: ");
+    datagramTable.print();
+    Serial.println();
   }
 }
 
@@ -95,10 +103,27 @@ void setup() {
   
   lora_setup();
   datagramTable.nodeId_set(nodeId);
+
+  Serial.println("=== Initial DatagramTable state ===");
+  datagramTable.print();
+  Serial.println();
+
+  Serial.println("=== LoRa Node ===");
+  lastSecond = millis();
 }
 
-void loop() {  
-    send_packet();
+void loop() { 
+    // listen tiap saat
     listen_packet();
-    delay(200);
+
+    // send 3 paket tiap 3 detik 
+    if (millis() - lastSecond >= 3000) {
+      lastSecond = millis();
+
+      Serial.println("=== Sending DatagramTable ===");
+      for (int i=0; i<3; i++) {
+        send_packet();
+        delay(50);
+      }
+    }
 }

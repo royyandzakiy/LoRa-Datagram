@@ -43,13 +43,15 @@ void lora_setup() {
 
   // cari tau nodeId diri sendiri
   nodeId = (int) EEPROM.read(EEPROM_ADDRESS_NODEID);
-  Serial.print("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: ");
-  Serial.println((String) nodeId);
+  Serial.println("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: " + (String) nodeId);
 }
+
+// DatagramTable harus di declare disini
+DatagramTable datagramTable;
 
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = myDatagramTable.get_to_string();
+  String datagramTableString = datagramTable.get_to_string();
   Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
@@ -65,13 +67,18 @@ void retrieve_packet() {
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String datagramTableString = LoRa.readString();
-    Serial.print(datagramTableString); 
-  }
+    String raw = LoRa.readString();
+    Serial.print(raw);
 
-  // print RSSI of packet
-  Serial.print("' with RSSI ");
-  Serial.println(LoRa.packetRssi());
+    // print RSSI of packet
+    Serial.print("' with RSSI ");
+    Serial.println(LoRa.packetRssi());
+
+    // parse string to datagramTable
+    // DatagramTable tempDatagramTable();
+
+    // update current datagramTable
+  }
 }
 
 void listen_packet() {
@@ -87,9 +94,11 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   
   lora_setup();
+  datagramTable.nodeId_set(nodeId);
 }
 
-void loop() {
-  // counter++;
-  delay(200);
+void loop() {  
+    // send_packet();
+    // listen_packet();
+    delay(200);
 }
