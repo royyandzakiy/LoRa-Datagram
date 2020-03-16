@@ -74,7 +74,8 @@ void retrieve_packet() {
     Serial.print("' with RSSI ");
     Serial.println(LoRa.packetRssi());
 
-    // parse string to Json
+    // parse string to datagramTable
+    // DatagramTable tempDatagramTable();
 
     // update current datagramTable
   }
@@ -93,11 +94,11 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   
   lora_setup();
+  datagramTable.nodeId_set(nodeId);
 }
 
 void loop() {  
-    datagramTable.nodeId_set(nodeId);
     send_packet();
     listen_packet();
-    delay(1000);
+    delay(200);
 }

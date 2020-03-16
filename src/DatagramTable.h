@@ -7,15 +7,18 @@
 class DatagramTable {
   public:
     DatagramTable();
-    Datagram datagrams[N_NODES];
+    DatagramTable(String);
     
     void nodeId_set(int);
-    void copy(DatagramTable);
+    void set(DatagramTable);
+    void set(String);
+
     void update(DatagramTable, int);
     void print();
     String get_to_string();
 
     int nodeId;
+    Datagram datagrams[N_NODES];
 };
 
 #endif

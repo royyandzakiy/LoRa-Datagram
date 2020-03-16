@@ -12,7 +12,7 @@ class Datagram {
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,datetimeSent,datetimeReceived;" (nanti ganti counter dengan datetime)
   // DATAGRAM TABLE FORMAT (array): [ datagram[0], datagram[1], ... }
   // DATAGRAM FORMAT (JSON): {"hopFrom": hopFrom, "rssi": rssi, "alertStatus": alertStatus}
-  // DATAGRAM TABLE FORMAT (json): { nodeId: [datagram_nodeId1, datagram_nodeId2, ..., datagram_nodeIdN] }  
+  // DATAGRAM TABLE FORMAT (json): { "nodeId": nodeId,"datagrams":[datagram_nodeId1, datagram_nodeId2, ..., datagram_nodeIdN] }  
 
   /*
    * Note:
@@ -35,17 +35,18 @@ class Datagram {
    
   public:
     Datagram();
-    Datagram(int, int, int);
-    Datagram(String, String, String);
+    Datagram(int, int, int, int);
+    Datagram(String, String, String, String);
     Datagram(String);
     void stringToJsonParser(String, JsonObject);
-    void set(int, int, int);
-    void set(String, String, String);
+    void set(int, int, int, int);
+    void set(String, String, String, String);
+    void set(String);
     void set_from_string(String);
     String get_to_string();
     void print_to_string();
     
-    int hopFrom, rssi, alertStatus;
+    int nodeId, hopFrom, rssi, alertStatus;
 };
 
 #endif

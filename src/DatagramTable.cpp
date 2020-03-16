@@ -21,10 +21,46 @@ void DatagramTable::nodeId_set(int _nodeId) {
   }
 }
 
-void DatagramTable::copy(DatagramTable _datagramTable) {
+DatagramTable::DatagramTable(String stringDatagramTable) {
+  // ubah jadi json dengan parser
+  DynamicJsonDocument doc(1024);
+
+  deserializeJson(doc, stringDatagramTable);
+  JsonObject obj = doc.as<JsonObject>();
+
+  nodeId = obj["nodeId"];
+
+  // array of jsonDocuments berupa datagram di iterasi untuk di build  
+  for (int i=0; i<N_NODES; i++) {
+    String tempStringDatagram = obj["datagrams"][i];
+    datagrams[i].set(tempStringDatagram);
+  }
+
+  obj.clear();
+}
+
+void DatagramTable::set(DatagramTable _datagramTable) {
   for (int i=0; i<N_NODES; i++) {
     datagrams[i].set_from_string(_datagramTable.datagrams[i].get_to_string());
   }
+}
+
+void DatagramTable::set(String stringDatagramTable) {
+  // ubah jadi json dengan parser
+  DynamicJsonDocument doc(1024);
+
+  deserializeJson(doc, stringDatagramTable);
+  JsonObject obj = doc.as<JsonObject>();
+
+  nodeId = obj["nodeId"];
+  
+  // array of jsonDocuments berupa datagram di iterasi untuk di build  
+  for (int i=0; i<N_NODES; i++) {
+    String tempStringDatagram = obj["datagrams"][i];
+    datagrams[i].set(tempStringDatagram);
+  }
+
+  obj.clear();
 }
 
 void DatagramTable::update(DatagramTable _datagramTable, int _rssi) {
@@ -47,7 +83,7 @@ void DatagramTable::update(DatagramTable _datagramTable, int _rssi) {
 }
 
 String DatagramTable::get_to_string() {
-  String temp = "{" + (String) nodeId + ":[";
+  String temp = "{\"nodeId\":" + (String) nodeId + ",\"datagrams\":[";
 
   for (int i=0; i<N_NODES; i++) {
     temp += datagrams[i].get_to_string();
