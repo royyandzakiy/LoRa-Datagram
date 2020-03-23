@@ -30,12 +30,11 @@ const int dio0 = 2; //*/
 const char* ssid = "Ciheulang 3";
 const char* password = "CBnotiga";
 const char* mqtt_server = "192.168.1.7";
+String topicPub = "theSentinel/nodeHub";
+String topicSub = "theSentinel/nodeHubDebug";
 
-WiFiClient thisClient;
-PubSubClient client(thisClient);
-unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE  (100)
-int value = 0;
+WiFiClient thisWifiClient;
+PubSubClient pubSubClient(thisWifiClient);
 
 // === OTHERS
 unsigned long lastSecond;
@@ -95,28 +94,27 @@ void publish_packet(DatagramTable _datagramTable) {
   String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + datagramTableString;
   char msg[tempMsgString.length() + 1];
   strcpy(msg, tempMsgString.c_str());
-  // snprintf (msg, MSG_BUFFER_SIZE, tempMsgString, 0);
-  client.publish("outTopic/nodeId", msg);
+  pubSubClient.publish(topicPub.c_str(), msg);
   Serial.println("published::" + (String) msg);
 }
 
 void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected()) {
+  while (!pubSubClient.connected()) {
     Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
+    // Create a pubSubClient ID
     String clientId = "NodeClient-";
     clientId += (String) nodeId;
     // Attempt to connect
-    if (client.connect(clientId.c_str())) {
+    if (pubSubClient.connect(clientId.c_str())) {
       Serial.println("connected");
-      // Once connected, publish an announcement...
+      // Once connected, publish
       publish_packet(thisDatagramTable);
       // ... and resubscribe
-      client.subscribe("inTopic");
+      pubSubClient.subscribe(topicSub.c_str());
     } else {
       Serial.print("failed, rc=");
-      Serial.print(client.state());
+      Serial.print(pubSubClient.state());
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
@@ -149,9 +147,6 @@ void lora_setup() {
   nodeId = (int) EEPROM.read(EEPROM_ADDRESS_NODEID);
   Serial.println("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: " + (String) nodeId);
 }
-
-// DatagramTable harus di declare disini
-// DatagramTable thisDatagramTable;
 
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
@@ -222,27 +217,30 @@ void setup() {
 
   // === WiFi Setup
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  pubSubClient.setServer(mqtt_server, 1883);
+  pubSubClient.setCallback(callback);
 }
 
 void loop() { 
     // pastikan wifi terhubung
-    if (!client.connected()) {
+    if (!pubSubClient.connected()) {
       reconnect();
     }
-    client.loop();
+    pubSubClient.loop();
 
     // listen paket lora tiap saat
     listen_packet();
 
     unsigned long now = millis();
     // send 3 paket lora tiap 3 detik 
-    if (now - lastSecond > 3000) { // kirim tiap 3 detik
+    int intervalPengiriman = 3000;
+    int selisihWaktu = now - lastSecond;
+    if (selisihWaktu > intervalPengiriman) { // kirim tiap 3 detik
       lastSecond = now;
 
       Serial.println("=== Sending DatagramTable ===");
 
+      // jumlah paket yang dikirim dan publish dalam satu waktu, ubah jika dirasa ada paket loss
       int iterasiPengiriman = 1;
       for (int i=0; i<iterasiPengiriman; i++) {
         send_packet();       
