@@ -1,9 +1,15 @@
+// === BASIC
 #include <Arduino.h>
 #include "DatagramTable.h"
-
 #include <SPI.h>
-#include <LoRa.h>
 #include <EEPROM.h>
+
+const int EEPROM_SIZE = 1; // ESP32 max 512, Arduino Uno max 1024
+const int EEPROM_ADDRESS_NODEID = 0; // tempat penyimpanan NODEID
+int nodeId;
+
+// === LoRa
+#include <LoRa.h>
 
 //define the pins used by the transceiver module
 /*// Arduino Uno
@@ -16,12 +22,16 @@ const int ss = 5;
 const int rst = 14;
 const int dio0 = 2; //*/
 
-const int EEPROM_SIZE = 1; // ESP32 max 512, Arduino Uno max 1024
-const int EEPROM_ADDRESS_NODEID = 0; // tempat penyimpanan NODEID
-
-int nodeId;
+// === OTHERS
 unsigned long lastSecond;
 
+// DatagramTable harus di declare disini
+DatagramTable thisDatagramTable;
+
+
+// ----------------------
+
+// === LoRa
 void lora_setup() {
   Serial.println("=== LoRa Setup ===");
 
@@ -47,12 +57,9 @@ void lora_setup() {
   Serial.println("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: " + (String) nodeId);
 }
 
-// DatagramTable harus di declare disini
-DatagramTable datagramTable;
-
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = datagramTable.get_to_string();
+  String datagramTableString = thisDatagramTable.get_to_string();
   Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
@@ -78,13 +85,13 @@ void retrieve_packet() {
 
     Serial.println("packet : " + datagramTableStringPacket);
 
-    // parse string to datagramTable
+    // parse string to thisDatagramTable
     DatagramTable tempDatagramTable(datagramTableStringPacket);
 
-    // update current datagramTable
-    datagramTable.update(tempDatagramTable, rssiPacket);
+    // update current thisDatagramTable
+    thisDatagramTable.update(tempDatagramTable, rssiPacket);
     Serial.print("updated: ");
-    datagramTable.print();
+    thisDatagramTable.print();
     Serial.println();
   }
 }
@@ -96,16 +103,19 @@ void listen_packet() {
   }
 }
 
+// ----------------------
+
 void setup() {
   Serial.begin(115200);
   while (!Serial);
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   
+  // === LoRa Setup
   lora_setup();
-  datagramTable.nodeId_set(nodeId);
+  thisDatagramTable.nodeId_set(nodeId);
 
   Serial.println("=== Initial DatagramTable state ===");
-  datagramTable.print();
+  thisDatagramTable.print();
   Serial.println();
 
   Serial.println("=== LoRa Node ===");
@@ -113,15 +123,21 @@ void setup() {
 }
 
 void loop() { 
-    // listen tiap saat
+    // listen paket lora tiap saat
     listen_packet();
 
-    // send 3 paket tiap 3 detik 
-    if (millis() - lastSecond >= 3000) {
-      lastSecond = millis();
+    unsigned long now = millis();
+    // send 3 paket lora tiap 3 detik 
+    int intervalPengiriman = 3000;
+    int selisihWaktu = now - lastSecond;
+    if (selisihWaktu > intervalPengiriman) { // kirim tiap 3 detik
+      lastSecond = now;
 
       Serial.println("=== Sending DatagramTable ===");
-      for (int i=0; i<3; i++) {
+
+      // jumlah paket yang dikirim dan publish dalam satu waktu, ubah jika dirasa ada paket loss
+      int iterasiPengiriman = 1;
+      for (int i=0; i<iterasiPengiriman; i++) {
         send_packet();
         delay(50);
       }
