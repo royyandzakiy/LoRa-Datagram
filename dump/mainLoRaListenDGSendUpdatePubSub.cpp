@@ -89,13 +89,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-void publish_packet(DatagramTable _datagramTable) {
-  String datagramTableString = _datagramTable.get_to_string();
-  // String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + datagramTableString;
-  String tempMsgString = datagramTableString;
+// void publish_packet(DatagramTable _datagramTable) {
+//   String datagramTableString = _datagramTable.get_to_string();
+//   // String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + datagramTableString;
+//   String tempMsgString = datagramTableString;
 
-  char msg[tempMsgString.length() + 1];
-  strcpy(msg, tempMsgString.c_str());
+//   char msg[tempMsgString.length() + 1];
+//   strcpy(msg, tempMsgString.c_str());
+  
+//   pubSubClient.publish(topicPub.c_str(), msg);
+//   Serial.println("published::" + (String) msg);
+// }
+
+void publish_packet(String _datagramTableString) {
+  char msg[_datagramTableString.length() + 1];
+  strcpy(msg, _datagramTableString.c_str());
   
   pubSubClient.publish(topicPub.c_str(), msg);
   Serial.println("published::" + (String) msg);
@@ -187,6 +195,9 @@ void retrieve_packet() {
     Serial.print("updated: ");
     thisDatagramTable.print();
     Serial.println();
+
+    // publish retrieved packet to mqtt server
+    publish_packet(datagramTableStringPacket);
   }
 }
 
@@ -244,7 +255,7 @@ void loop() {
       int iterasiPengiriman = 1;
       for (int i=0; i<iterasiPengiriman; i++) {
         send_packet();       
-        publish_packet(thisDatagramTable);
+        publish_packet(thisDatagramTable.get_to_string());
         delay(50);
       }
     }
