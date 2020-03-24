@@ -14,6 +14,7 @@ class DatagramTable {
     void set(String);
 
     void update(DatagramTable, int);
+    void update(String, int);
     void print();
     String get_to_string();
 

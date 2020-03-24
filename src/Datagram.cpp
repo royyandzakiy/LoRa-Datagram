@@ -57,7 +57,7 @@ void Datagram::set(String stringDatagram) {
 
 String Datagram::get_to_string() {
   String tempDatagramJsonString;
-  tempDatagramJsonString = "{\"nodeId\":" + (String) nodeId + "\"hopFrom\":" + (String) hopFrom + ",\"rssi\":" + (String) rssi + ",\"alertStatus\":" + (String) alertStatus + "}";
+  tempDatagramJsonString = "{\"nodeId\":" + (String) nodeId + ",\"hopFrom\":" + (String) hopFrom + ",\"rssi\":" + (String) rssi + ",\"alertStatus\":" + (String) alertStatus + "}";
   
   return tempDatagramJsonString;
 }

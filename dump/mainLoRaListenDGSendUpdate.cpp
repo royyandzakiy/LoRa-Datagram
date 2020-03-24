@@ -60,12 +60,12 @@ void lora_setup() {
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
   String datagramTableString = thisDatagramTable.get_to_string();
-  Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
   LoRa.beginPacket();
   LoRa.print(datagramTableString);
   LoRa.endPacket();
+  Serial.println(datagramTableString);
 }
 
 void retrieve_packet() {

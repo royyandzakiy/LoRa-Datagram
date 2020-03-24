@@ -27,7 +27,7 @@ void DatagramTable::nodeId_set(int _nodeId) {
 
 DatagramTable::DatagramTable(String stringDatagramTable) {
   // ubah jadi json dengan parser
-  DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(10000);
 
   deserializeJson(doc, stringDatagramTable);
   JsonObject obj = doc.as<JsonObject>();
@@ -85,6 +85,27 @@ void DatagramTable::update(DatagramTable _datagramTable, int _rssi) {
         if (_datagramTable.datagrams[i].hopFrom != nodeId) // memeriksa jika hop berasal dari diri sendiri, jika benar maka tidak perlu update
           datagrams[i].hopFrom = nodeIdSender;
   }
+}
+
+void DatagramTable::update(String _datagramTableString, int _rssi) {
+  // // UNDER MAINTENANCE!
+  // // Masih dalam perbaikan
+  // DatagramTable _datagramTable(_datagramTableString);
+  // int nodeIdSender = _datagramTable.nodeId;
+
+  // // update diagramTable antara self dengan nodeId pengirim
+  // datagrams[nodeIdSender-1].nodeId = nodeIdSender;
+  // datagrams[nodeIdSender-1].hopFrom = nodeIdSender;
+  // datagrams[nodeIdSender-1].rssi = _rssi;
+
+  // // iterasi table datagram, ubah hop  
+  // for (int i=0; i<N_NODES; i++) {
+  //   boolean self = (i==(nodeId-1));
+  //   if (!self) // memastikan bagian self tidak diubah
+  //     if (_datagramTable.datagrams[i].hopFrom != 0) // memeriksa jika ada bagian yang hop-nya masih kosong. artinya, jika data yang tersimpan tidak pernah berasal langsung dari node-nya sendiri
+  //       if (_datagramTable.datagrams[i].hopFrom != nodeId) // memeriksa jika hop berasal dari diri sendiri, jika benar maka tidak perlu update
+  //         datagrams[i].hopFrom = nodeIdSender;
+  // }
 }
 
 String DatagramTable::get_to_string() {

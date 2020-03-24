@@ -89,10 +89,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-void publish_packet(String _datagramTableString) {
-  String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + _datagramTableString;
+void publish_packet(DatagramTable _datagramTable) {
+  String datagramTableString = _datagramTable.get_to_string();
+  // String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + datagramTableString;
+  String tempMsgString = datagramTableString;
+
   char msg[tempMsgString.length() + 1];
   strcpy(msg, tempMsgString.c_str());
+  
   pubSubClient.publish(topicPub.c_str(), msg);
   Serial.println("published::" + (String) msg);
 }
@@ -108,7 +112,7 @@ void reconnect() {
     if (pubSubClient.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish
-      publish_packet(thisDatagramTable.get_to_string());
+      // publish_packet(thisDatagramTable);
       // ... and resubscribe
       pubSubClient.subscribe(topicSub.c_str());
     } else {
@@ -150,12 +154,12 @@ void lora_setup() {
 void send_packet() {
   Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
   String datagramTableString = thisDatagramTable.get_to_string();
-  Serial.println(datagramTableString);
   
   // Send LoRa packet to receiver
   LoRa.beginPacket();
   LoRa.print(datagramTableString);
   LoRa.endPacket();
+  Serial.println(datagramTableString);
 }
 
 void retrieve_packet() {
@@ -183,9 +187,6 @@ void retrieve_packet() {
     Serial.print("updated: ");
     thisDatagramTable.print();
     Serial.println();
-
-    // publish thisDatagramTable to mqtt
-    publish_packet(datagramTableStringPacket);
   }
 }
 
@@ -243,9 +244,7 @@ void loop() {
       int iterasiPengiriman = 1;
       for (int i=0; i<iterasiPengiriman; i++) {
         send_packet();       
-
-        String datagramTableString = thisDatagramTable.get_to_string();
-        publish_packet(datagramTableString);
+        publish_packet(thisDatagramTable);
         delay(50);
       }
     }

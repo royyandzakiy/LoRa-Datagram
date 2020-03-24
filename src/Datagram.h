@@ -4,8 +4,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-const int N_NODES = 3;
-const int DATAGRAM_SIZE = 3;
+const int N_NODES = 4;
 
 class Datagram {
   // DATAGRAM FORMAT (string): "nodeId,hopFrom,rssi,alertStatus,counter,counter;" (nanti ganti counter dengan datetime)
