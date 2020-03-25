@@ -112,7 +112,7 @@ void setup() {
   
   // === LoRa Setup
   lora_setup();
-  thisDatagramTable.nodeId_set(nodeId);
+  thisDatagramTable.set_nodeId(nodeId);
 
   Serial.println("=== Initial DatagramTable state ===");
   thisDatagramTable.print();

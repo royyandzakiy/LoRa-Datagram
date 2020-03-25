@@ -89,18 +89,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-// void publish_packet(DatagramTable _datagramTable) {
-//   String datagramTableString = _datagramTable.get_to_string();
-//   // String tempMsgString = "hello from nodeId " + (String) nodeId + "::" + datagramTableString;
-//   String tempMsgString = datagramTableString;
-
-//   char msg[tempMsgString.length() + 1];
-//   strcpy(msg, tempMsgString.c_str());
-  
-//   pubSubClient.publish(topicPub.c_str(), msg);
-//   Serial.println("published::" + (String) msg);
-// }
-
 void publish_packet(String _datagramTableString) {
   char msg[_datagramTableString.length() + 1];
   strcpy(msg, _datagramTableString.c_str());
@@ -217,7 +205,7 @@ void setup() {
   
   // === LoRa Setup
   lora_setup();
-  thisDatagramTable.nodeId_set(nodeId);
+  thisDatagramTable.set_nodeId(nodeId);
 
   Serial.println("=== Initial DatagramTable state ===");
   thisDatagramTable.print();

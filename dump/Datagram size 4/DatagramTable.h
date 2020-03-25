@@ -9,15 +9,14 @@ class DatagramTable {
     DatagramTable();
     DatagramTable(String);
     
-    void set_nodeId(int);
+    void nodeId_set(int);
     void set(DatagramTable);
     void set(String);
 
     void update(DatagramTable, int);
     void update(String, int);
-
-    String get_to_string();
     void print();
+    String get_to_string();
 
     int nodeId;
     Datagram datagrams[N_NODES];
