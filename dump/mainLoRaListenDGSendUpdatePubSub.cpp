@@ -29,7 +29,7 @@ const int dio0 = 2; //*/
 
 const char* ssid = "Ciheulang 3";
 const char* password = "CBnotiga";
-const char* mqtt_server = "192.168.1.7";
+const char* mqtt_server = "192.168.1.3";
 String topicPub = "theSentinel/nodeHub";
 String topicSub = "theSentinel/nodeHubDebug";
 
