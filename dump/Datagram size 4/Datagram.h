@@ -34,18 +34,17 @@ class Datagram {
    
   public:
     Datagram();
-    Datagram(int, int, int, int);
-    Datagram(String, String, String, String);
+    Datagram(int, int);
+    Datagram(String, String);
     Datagram(String);
     void stringToJsonParser(String, JsonObject);
-    void set(int, int, int, int);
-    void set(String, String, String, String);
+    void set(int, int);
+    void set(String, String);
     void set(String);
     void set_from_string(String);
     String get_to_string();
     void print_to_string();
-    
-    int nodeId, hopFrom, rssi, alertStatus;
-};
 
+    int n, r;
+};
 #endif
