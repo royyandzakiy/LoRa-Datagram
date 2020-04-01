@@ -1,6 +1,6 @@
 // === BASIC
 #include <Arduino.h>
-#include "DatagramTable.h"
+#include "RoutingTable.h"
 #include <SPI.h>
 #include <EEPROM.h>
 
@@ -39,8 +39,8 @@ PubSubClient pubSubClient(thisWifiClient);
 // === OTHERS
 unsigned long lastSecond;
 
-// DatagramTable harus di declare disini
-DatagramTable thisDatagramTable;
+// RoutingTable harus di declare disini
+RoutingTable thisRoutingTable;
 
 
 // ----------------------
@@ -89,9 +89,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
-void publish_packet(String _datagramTableString) {
-  char msg[_datagramTableString.length() + 1];
-  strcpy(msg, _datagramTableString.c_str());
+void publish_packet(String _routingTableString) {
+  char msg[_routingTableString.length() + 1];
+  strcpy(msg, _routingTableString.c_str());
   
   pubSubClient.publish(topicPub.c_str(), msg);
   Serial.println("published::" + (String) msg);
@@ -108,7 +108,7 @@ void reconnect() {
     if (pubSubClient.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish
-      // publish_packet(thisDatagramTable);
+      // publish_packet(thisRoutingTable);
       // ... and resubscribe
       pubSubClient.subscribe(topicSub.c_str());
     } else {
@@ -148,14 +148,14 @@ void lora_setup() {
 }
 
 void send_packet() {
-  Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = thisDatagramTable.get_to_string();
+  Serial.print("nodeId " + (String) nodeId + " Sending routing: ");
+  String routingTableString = thisRoutingTable.get_to_string();
   
   // Send LoRa packet to receiver
   LoRa.beginPacket();
-  LoRa.print(datagramTableString);
+  LoRa.print(routingTableString);
   LoRa.endPacket();
-  Serial.println(datagramTableString);
+  Serial.println(routingTableString);
 }
 
 void retrieve_packet() {
@@ -163,29 +163,29 @@ void retrieve_packet() {
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String datagramTableStringPacket = LoRa.readString();
+    String routingTableStringPacket = LoRa.readString();
 
     // print RSSI of packet
     int rssiPacket = LoRa.packetRssi();
 
-    Serial.println("=== Received then Updated DatagramTable state ===");
-    Serial.print("nodeId " + (String) nodeId + " Received datagram ");
+    Serial.println("=== Received then Updated RoutingTable state ===");
+    Serial.print("nodeId " + (String) nodeId + " Received routing ");
     Serial.print("with RSSI ");
     Serial.println((String) rssiPacket);
 
-    Serial.println("packet : " + datagramTableStringPacket);
+    Serial.println("packet : " + routingTableStringPacket);
 
-    // parse string to thisDatagramTable
-    DatagramTable tempDatagramTable(datagramTableStringPacket);
+    // parse string to thisRoutingTable
+    RoutingTable tempRoutingTable(routingTableStringPacket);
 
-    // update current thisDatagramTable
-    thisDatagramTable.update(tempDatagramTable, rssiPacket);
+    // update current thisRoutingTable
+    thisRoutingTable.update(tempRoutingTable, rssiPacket);
     Serial.print("updated: ");
-    thisDatagramTable.print();
+    thisRoutingTable.print();
     Serial.println();
 
     // publish retrieved packet to mqtt server
-    publish_packet(datagramTableStringPacket);
+    publish_packet(routingTableStringPacket);
   }
 }
 
@@ -205,10 +205,10 @@ void setup() {
   
   // === LoRa Setup
   lora_setup();
-  thisDatagramTable.set_nodeId(nodeId);
+  thisRoutingTable.set_nodeId(nodeId);
 
-  Serial.println("=== Initial DatagramTable state ===");
-  thisDatagramTable.print();
+  Serial.println("=== Initial RoutingTable state ===");
+  thisRoutingTable.print();
   Serial.println();
 
   Serial.println("=== LoRa Node ===");
@@ -237,13 +237,13 @@ void loop() {
     if (selisihWaktu > intervalPengiriman) { // kirim tiap 3 detik
       lastSecond = now;
 
-      Serial.println("=== Sending DatagramTable ===");
+      Serial.println("=== Sending RoutingTable ===");
 
       // jumlah paket yang dikirim dan publish dalam satu waktu, ubah jika dirasa ada paket loss
       int iterasiPengiriman = 1;
       for (int i=0; i<iterasiPengiriman; i++) {
         send_packet();       
-        publish_packet(thisDatagramTable.get_to_string());
+        publish_packet(thisRoutingTable.get_to_string());
         delay(50);
       }
     }

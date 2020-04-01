@@ -1,6 +1,6 @@
 // === BASIC
 #include <Arduino.h>
-#include "DatagramTable.h"
+#include "RoutingTable.h"
 #include <SPI.h>
 #include <EEPROM.h>
 
@@ -25,8 +25,8 @@ const int dio0 = 2; //*/
 // === OTHERS
 unsigned long lastSecond;
 
-// DatagramTable harus di declare disini
-DatagramTable thisDatagramTable;
+// RoutingTable harus di declare disini
+RoutingTable thisRoutingTable;
 
 
 // ----------------------
@@ -58,14 +58,14 @@ void lora_setup() {
 }
 
 void send_packet() {
-  Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = thisDatagramTable.get_to_string();
+  Serial.print("nodeId " + (String) nodeId + " Sending routing: ");
+  String routingTableString = thisRoutingTable.get_to_string();
   
   // Send LoRa packet to receiver
   LoRa.beginPacket();
-  LoRa.print(datagramTableString);
+  LoRa.print(routingTableString);
   LoRa.endPacket();
-  Serial.println(datagramTableString);
+  Serial.println(routingTableString);
 }
 
 void retrieve_packet() {
@@ -73,25 +73,25 @@ void retrieve_packet() {
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String datagramTableStringPacket = LoRa.readString();
+    String routingTableStringPacket = LoRa.readString();
 
     // print RSSI of packet
     int rssiPacket = LoRa.packetRssi();
 
-    Serial.println("=== Received then Updated DatagramTable state ===");
-    Serial.print("nodeId " + (String) nodeId + " Received datagram ");
+    Serial.println("=== Received then Updated RoutingTable state ===");
+    Serial.print("nodeId " + (String) nodeId + " Received routing ");
     Serial.print("with RSSI ");
     Serial.println((String) rssiPacket);
 
-    Serial.println("packet : " + datagramTableStringPacket);
+    Serial.println("packet : " + routingTableStringPacket);
 
-    // parse string to thisDatagramTable
-    DatagramTable tempDatagramTable(datagramTableStringPacket);
+    // parse string to thisRoutingTable
+    RoutingTable tempRoutingTable(routingTableStringPacket);
 
-    // update current thisDatagramTable
-    thisDatagramTable.update(tempDatagramTable, rssiPacket);
+    // update current thisRoutingTable
+    thisRoutingTable.update(tempRoutingTable, rssiPacket);
     Serial.print("updated: ");
-    thisDatagramTable.print();
+    thisRoutingTable.print();
     Serial.println();
   }
 }
@@ -112,10 +112,10 @@ void setup() {
   
   // === LoRa Setup
   lora_setup();
-  thisDatagramTable.set_nodeId(nodeId);
+  thisRoutingTable.set_nodeId(nodeId);
 
-  Serial.println("=== Initial DatagramTable state ===");
-  thisDatagramTable.print();
+  Serial.println("=== Initial RoutingTable state ===");
+  thisRoutingTable.print();
   Serial.println();
 
   Serial.println("=== LoRa Node ===");
@@ -133,7 +133,7 @@ void loop() {
     if (selisihWaktu > intervalPengiriman) { // kirim tiap 3 detik
       lastSecond = now;
 
-      Serial.println("=== Sending DatagramTable ===");
+      Serial.println("=== Sending RoutingTable ===");
 
       // jumlah paket yang dikirim dan publish dalam satu waktu, ubah jika dirasa ada paket loss
       int iterasiPengiriman = 1;
