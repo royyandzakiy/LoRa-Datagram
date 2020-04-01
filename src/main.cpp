@@ -1,9 +1,15 @@
+// === BASIC
 #include <Arduino.h>
-#include "DatagramTable.h"
-
+#include "RoutingTable.h"
 #include <SPI.h>
-#include <LoRa.h>
 #include <EEPROM.h>
+
+const int EEPROM_SIZE = 1; // ESP32 max 512, Arduino Uno max 1024
+const int EEPROM_ADDRESS_NODEID = 0; // tempat penyimpanan NODEID
+int nodeId;
+
+// === LoRa
+#include <LoRa.h>
 
 //define the pins used by the transceiver module
 /*// Arduino Uno
@@ -16,12 +22,106 @@ const int ss = 5;
 const int rst = 14;
 const int dio0 = 2; //*/
 
-const int EEPROM_SIZE = 1; // ESP32 max 512, Arduino Uno max 1024
-const int EEPROM_ADDRESS_NODEID = 0; // tempat penyimpanan NODEID
+// === WiFi
+// #include <ESP8266WiFi.h> // use for ESP8266
+#include <WiFi.h> // use for anything else
+#include <PubSubClient.h>
 
-int nodeId;
+const char* ssid = "haluq";
+const char* password = "Jun54l54R0y";
+const char* mqtt_server = "192.168.1.9";
+String topicPub = "theSentinel/nodeHub";
+String topicSub = "theSentinel/nodeHubDebug";
+
+WiFiClient thisWifiClient;
+PubSubClient pubSubClient(thisWifiClient);
+
+// === OTHERS
 unsigned long lastSecond;
 
+// RoutingTable harus di declare disini
+RoutingTable thisRoutingTable;
+
+
+// ----------------------
+
+// === WiFi
+void setup_wifi() {
+
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  randomSeed(micros());
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // Switch on the LED if an 1 was received as first character
+  if ((char)payload[0] == '1') {
+    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    // but actually the LED is on; this is because
+    // it is active low on the ESP-01)
+  } else {
+    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+  }
+
+}
+
+void publish_packet(String _routingTableString) {
+  char msg[_routingTableString.length() + 1];
+  strcpy(msg, _routingTableString.c_str());
+  
+  pubSubClient.publish(topicPub.c_str(), msg);
+  Serial.println("published::" + (String) msg);
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!pubSubClient.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a pubSubClient ID
+    String clientId = "NodeClient-";
+    clientId += (String) nodeId;
+    // Attempt to connect
+    if (pubSubClient.connect(clientId.c_str())) {
+      Serial.println("connected");
+      // Once connected, publish
+      // publish_packet(thisRoutingTable);
+      // ... and resubscribe
+      pubSubClient.subscribe(topicSub.c_str());
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(pubSubClient.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+// === LoRa
 void lora_setup() {
   Serial.println("=== LoRa Setup ===");
 
@@ -47,45 +147,48 @@ void lora_setup() {
   Serial.println("nodeId at EEPROM address '" + (String) EEPROM_ADDRESS_NODEID + "' is: " + (String) nodeId);
 }
 
-// DatagramTable harus di declare disini
-DatagramTable datagramTable;
-
 void send_packet() {
-  Serial.print("nodeId " + (String) nodeId + " Sending datagram: ");
-  String datagramTableString = datagramTable.get_to_string();
-  Serial.println(datagramTableString);
+  Serial.print("nodeId " + (String) nodeId + " Sending routing: ");
+  String routingTableString = thisRoutingTable.get_to_string();
+  Serial.println("DEBUG::send_packet()");
   
   // Send LoRa packet to receiver
-  LoRa.beginPacket();
-  LoRa.print(datagramTableString);
-  LoRa.endPacket();
+  // LoRa.beginPacket();
+  // LoRa.print(routingTableString);
+  // LoRa.endPacket();
+  Serial.println(routingTableString);
 }
 
 void retrieve_packet() {
+  Serial.println("DEBUG::retrieve_packet()");
+
   // received a packet
   // read packet
   while (LoRa.available()) {
     // masukkan ke dalam format      
-    String datagramTableStringPacket = LoRa.readString();
+    String routingTableStringPacket = LoRa.readString();
 
     // print RSSI of packet
     int rssiPacket = LoRa.packetRssi();
 
-    Serial.println("=== Received then Updated DatagramTable state ===");
-    Serial.print("nodeId " + (String) nodeId + " Received datagram ");
+    Serial.println("=== Received then Updated RoutingTable state ===");
+    Serial.print("nodeId " + (String) nodeId + " Received routing ");
     Serial.print("with RSSI ");
     Serial.println((String) rssiPacket);
 
-    Serial.println("packet : " + datagramTableStringPacket);
+    Serial.println("packet : " + routingTableStringPacket);
 
-    // parse string to datagramTable
-    DatagramTable tempDatagramTable(datagramTableStringPacket);
+    // parse string to thisRoutingTable
+    RoutingTable tempRoutingTable(routingTableStringPacket);
 
-    // update current datagramTable
-    datagramTable.update(tempDatagramTable, rssiPacket);
+    // update current thisRoutingTable
+    thisRoutingTable.update(tempRoutingTable, rssiPacket);
     Serial.print("updated: ");
-    datagramTable.print();
+    thisRoutingTable.print();
     Serial.println();
+
+    // publish retrieved packet to mqtt server
+    publish_packet(routingTableStringPacket);
   }
 }
 
@@ -96,33 +199,54 @@ void listen_packet() {
   }
 }
 
+// ----------------------
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial);
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   
+  // === LoRa Setup
   lora_setup();
-  datagramTable.nodeId_set(nodeId);
+  thisRoutingTable.set_nodeId(nodeId);
 
-  Serial.println("=== Initial DatagramTable state ===");
-  datagramTable.print();
+  Serial.println("=== Initial RoutingTable state ===");
+  thisRoutingTable.print();
   Serial.println();
 
   Serial.println("=== LoRa Node ===");
   lastSecond = millis();
+
+  // === WiFi Setup
+  setup_wifi();
+  pubSubClient.setServer(mqtt_server, 1883);
+  pubSubClient.setCallback(callback);
 }
 
 void loop() { 
-    // listen tiap saat
+    // pastikan wifi terhubung
+    if (!pubSubClient.connected()) {
+      reconnect();
+    }
+    pubSubClient.loop();
+
+    // listen paket lora tiap saat
     listen_packet();
 
-    // send 3 paket tiap 3 detik 
-    if (millis() - lastSecond >= 3000) {
-      lastSecond = millis();
+    unsigned long now = millis();
+    // send 3 paket lora tiap 3 detik 
+    int intervalPengiriman = 3000;
+    int selisihWaktu = now - lastSecond;
+    if (selisihWaktu > intervalPengiriman) { // kirim tiap 3 detik
+      lastSecond = now;
 
-      Serial.println("=== Sending DatagramTable ===");
-      for (int i=0; i<3; i++) {
-        send_packet();
+      Serial.println("=== Sending RoutingTable ===");
+
+      // jumlah paket yang dikirim dan publish dalam satu waktu, ubah jika dirasa ada paket loss
+      int iterasiPengiriman = 1;
+      for (int i=0; i<iterasiPengiriman; i++) {
+        send_packet();       
+        publish_packet(thisRoutingTable.get_to_string());
         delay(50);
       }
     }

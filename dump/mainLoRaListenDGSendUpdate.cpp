@@ -106,7 +106,7 @@ void listen_packet() {
 // ----------------------
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial);
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   

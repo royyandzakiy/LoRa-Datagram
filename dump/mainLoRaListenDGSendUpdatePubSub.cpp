@@ -27,9 +27,9 @@ const int dio0 = 2; //*/
 #include <WiFi.h> // use for anything else
 #include <PubSubClient.h>
 
-const char* ssid = "Ciheulang 3";
-const char* password = "CBnotiga";
-const char* mqtt_server = "192.168.1.3";
+const char* ssid = "haluq";
+const char* password = "Jun54l54R0y";
+const char* mqtt_server = "192.168.1.9";
 String topicPub = "theSentinel/nodeHub";
 String topicSub = "theSentinel/nodeHubDebug";
 
@@ -199,7 +199,7 @@ void listen_packet() {
 // ----------------------
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial);
   EEPROM.begin(EEPROM_SIZE); // gunakan untuk ESP32
   
