@@ -91,6 +91,7 @@ void loop() {
 
   if (millis() - lastSend > 5000) {
     sendMsg(routingTable.toString());
+    Serial.println(routingTable.toString());
     lastSend = millis();
   }
 }
