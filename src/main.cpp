@@ -1,5 +1,5 @@
 #include "global.h"
-#include "RoutingTable.h"
+#include "Routing/RoutingTable.h"
 
 static int nodeId;
 static RoutingTable routingTable;

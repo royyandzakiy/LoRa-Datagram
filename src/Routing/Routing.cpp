@@ -16,7 +16,7 @@ void Routing::set(String _n, String _r) {
 }
 
 void Routing::set(String routingString) {
-  // parser
+  // parse string using json parser, then save as normal integer for each "n" and "r"
   const size_t ROUTINGDOC_SIZE = JSON_OBJECT_SIZE(2);
   StaticJsonDocument<ROUTINGDOC_SIZE> routingDoc;
   deserializeJson(routingDoc, routingString);

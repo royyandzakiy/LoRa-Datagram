@@ -2,11 +2,11 @@
 #include "RoutingTable.h"
 
 RoutingTable::RoutingTable() {
-  // membuat empty routingTableJson
+  // create empty routingTableJson
   for (int i=0; i<N_NODES; i++) {
     Routing tempRouting;
 
-    // masukkan routing ke array of routings
+    // insert routing to array of routings
     routings[i] = tempRouting;
   }
 }
@@ -15,7 +15,7 @@ void RoutingTable::set_nodeId(int _nodeId) {
   nodeId = _nodeId;
 
   for (int i=0; i<N_NODES; i++) {
-    // jika posisi routing ada pada self, maka value default dari n adalah 255
+    // if position of routing is self, then default value of n is 255
     boolean self = (i==nodeId-1);
     if (self) {
       routings[i].n = 255;
