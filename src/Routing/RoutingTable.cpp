@@ -11,11 +11,23 @@ RoutingTable::RoutingTable() {
   }
 }
 
-void RoutingTable::set_nodeId(int _nodeId) {
+RoutingTable::RoutingTable(const String _routingTableString) {
+  // create empty routingTableJson
+  for (int i=0; i<N_NODES; i++) {
+    Routing tempRouting;
+
+    // insert routing to array of routings
+    routings[i] = tempRouting;
+  }
+
+  set(_routingTableString);
+}
+
+void RoutingTable::setNodeId(const int _nodeId) {
   nodeId = _nodeId;
 
   for (int i=0; i<N_NODES; i++) {
-    // if position of routing is self, then default value of n is 255
+    // if position of routing is self, then default value of n is 255. this prevents storing an address to self, because this is unpresentable through the expected json that will be generated using RoutingTable::get_to_string()
     boolean self = (i==nodeId-1);
     if (self) {
       routings[i].n = 255;
@@ -24,16 +36,20 @@ void RoutingTable::set_nodeId(int _nodeId) {
   }
 }
 
-void RoutingTable::set(RoutingTable senderRoutingTable) {
-  set_nodeId(senderRoutingTable.nodeId);
+int RoutingTable::getNodeId() const {
+  return nodeId;
+}
+
+void RoutingTable::set(const RoutingTable& _routingTable) {
+  setNodeId(_routingTable.getNodeId());
   for (int i=0; i<N_NODES; i++) {
-    routings[i].set_from_string(senderRoutingTable.routings[i].get_to_string());
+    routings[i].set(_routingTable.routings[i]);
   }
 }
 
-void RoutingTable::set(String routingTableString) {
+void RoutingTable::set(const String routingTableString) {
   // ROUTINGTABLE SERIALIZATION
-  const size_t ROUTINGTABLEDOC_SIZE = JSON_ARRAY_SIZE(N_NODES) + JSON_OBJECT_SIZE(1) + N_NODES*JSON_OBJECT_SIZE(2); // penjelasan: ukuran object RoutingTable adalah 1, lalu di dalamnya ada array of Routing berukuran 4, maka tiap 4 object routing harus ditambahkan sebagai ukuran juga, dimana tiap object routing berukuran 2
+  const size_t ROUTINGTABLEDOC_SIZE = JSON_ARRAY_SIZE(N_NODES) + JSON_OBJECT_SIZE(1) + N_NODES*JSON_OBJECT_SIZE(2); // how to calculate: size of object RoutingTable is 1, then within it is an array of Routing sized 4, and each Routing object of size 2 (n, r) is added
   
   // ROUTINGTABLE
   StaticJsonDocument<ROUTINGTABLEDOC_SIZE> routingTableDoc;
@@ -45,7 +61,7 @@ void RoutingTable::set(String routingTableString) {
     nodeIdString = keyValue.key().c_str();
   }
 
-  set_nodeId(nodeIdString.toInt());
+  setNodeId(nodeIdString.toInt());
 
   // ROUTINGARRAY
   JsonArray routingsJson = routingTableJson[nodeIdString];
@@ -59,51 +75,35 @@ void RoutingTable::set(String routingTableString) {
   routingTableDoc.clear();
 }
 
-RoutingTable::RoutingTable(String routingTableString) {
-  set(routingTableString);
-}
-
-void RoutingTable::update(RoutingTable senderRoutingTable, int _r) {  
-  // get tempRoutingTable.nodeId
-  // set new rssi value
-  int senderNodeId = senderRoutingTable.nodeId;
-
-  // UPDATE RSSI
-  // update routing nodeId pada routingTable sesuai dengan rssi baru
+void RoutingTable::update(RoutingTable _routingTable, const int _rssi) {  
+  // get nodeId from sender of _routingTable, update the _rssi value
+  int senderNodeId = _routingTable.nodeId;
   routings[senderNodeId-1].n = senderNodeId;
-  routings[senderNodeId-1].r = _r;
+  routings[senderNodeId-1].r = _rssi;
 
-  // UPDATE HOP
-  // iterasi table routing, ubah hop (n)
+  // UPDATE ROUTING TABLE
+  // update routing table rssi values from the received Routing Table. Update except for self and sender, because rssi to self will always be 255, rssi to sender has been updated before this
   for (int i=0; i<N_NODES; i++) {
-    boolean self = (i==(nodeId-1));
-    boolean sender = (i==(senderNodeId-1));
-    if (!self && !sender) // memastikan bagian self dan sender tidak diubah. nilai n pada self adalah 255, dan n pada sender adalah 255, yaitu nilai default yg dianggap tidak terjangkau.
-      if (senderRoutingTable.routings[i].n != 0) // memastikan hop pada routingTable sender tidak kosong. Jika kosong, artinya sender tidak terkoneksi ke node terkait, maka abaikan saja.
-        if (senderRoutingTable.routings[i].n != nodeId) // memastikan hop pada routingTable sender tidak berasal dari self, jika benar maka tidak perlu update karena nanti jadi redundan. Artinya self sudah pernah terhubung dengan node terkait, dan bahkan sudah menjadi hopping bagi sender.
-          routings[i].n = senderNodeId;
+    if (_routingTable.routings[i].n != nodeId || _routingTable.routings[i].n != senderNodeId)
+      routings[i].n = _routingTable.routings[i].n;
+      routings[i].r = _routingTable.routings[i].r;
   }
 }
 
-void RoutingTable::update(String senderRoutingTableString, int _r) {
-  RoutingTable senderRoutingTable;
-  senderRoutingTable.set(senderRoutingTableString);
-  update(senderRoutingTable, _r);
+void RoutingTable::update(const String _routingTableString, const int _rssi) {
+  RoutingTable _routingTable(_routingTableString);
+  update(_routingTable, _rssi);
 }
 
-String RoutingTable::get_to_string() {
+String RoutingTable::toString() {
   String temp = "{\"" + (String) nodeId + "\":[";
 
   for (int i=0; i<N_NODES; i++) {
-    temp += routings[i].get_to_string();
+    temp += routings[i].toString();
     if (i < N_NODES-1) temp += ",";
   }
 
   temp += "]}";
 
   return temp;
-}
-
-void RoutingTable::print() {
-  Serial.print(get_to_string());
 }

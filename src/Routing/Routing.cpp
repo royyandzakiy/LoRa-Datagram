@@ -6,16 +6,16 @@ Routing::Routing() {
   r = 0;
 }
 
-void Routing::set(int _n, int _r) {
+void Routing::set(const int _n, const int _r) {
   n = _n;
   r = _r;
 }
 
-void Routing::set(String _n, String _r) {
+void Routing::set(const String _n, const String _r) {
   set(_n.toInt(), _r.toInt());
 }
 
-void Routing::set(String routingString) {
+void Routing::set(const String routingString) {
   // parse string using json parser, then save as normal integer for each "n" and "r"
   const size_t ROUTINGDOC_SIZE = JSON_OBJECT_SIZE(2);
   StaticJsonDocument<ROUTINGDOC_SIZE> routingDoc;
@@ -26,27 +26,35 @@ void Routing::set(String routingString) {
   routingDoc.clear();
 }
 
-Routing::Routing(int _n, int _r) {
+void Routing::set(const Routing& _routing) {
+  set(_routing.n, _routing.r);
+}
+
+Routing::Routing(const int _n, const int _r) {
   n = _n;
   r = _r;
 }
 
-Routing::Routing(String _n, String _r) {
+Routing::Routing(const String _n, const String _r) {
   Routing(_n.toInt(), _r.toInt());
 }
 
-Routing::Routing(String stringRouting) {
+Routing::Routing(const String stringRouting) {
   // parser
   set(stringRouting);
 }
 
-String Routing::get_to_string() {
+Routing::Routing(const Routing& _routing) {
+  set(_routing.n, _routing.r);
+}
+
+String Routing::toString() {
   String tempRoutingJsonString;
   tempRoutingJsonString = "{\"n\":" + (String) n + ",\"r\":" + (String) r + "}";
   
   return tempRoutingJsonString;
 }
 
-void Routing::print_to_string() {
-  Serial.print(get_to_string());
+void Routing::print() {
+  Serial.print(toString());
 }

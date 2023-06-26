@@ -5,16 +5,17 @@
 class Routing {
   public:
     Routing();
-    Routing(int, int);
-    Routing(String, String);
-    Routing(String);
-    void stringToJsonParser(String, JsonObject);
-    void set(int, int);
-    void set(String, String);
-    void set(String);
-    void set_from_string(String);
-    String get_to_string();
-    void print_to_string();
+    Routing(const Routing&);
+    Routing(const int, const int);
+    Routing(const String, const String);
+    Routing(const String);
+    void stringToJsonParser(const String, const JsonObject);
+    void set(const int, const int);
+    void set(const String, const String);
+    void set(const String);
+    void set(const Routing&);
+    String toString();
+    void print();
     
     int n, r;
 };

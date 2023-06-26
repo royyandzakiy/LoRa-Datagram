@@ -19,7 +19,7 @@
 #define PIN_SS 10
 #define PIN_RST 9
 #define PIN_DIO0 2
-#else defined(BRD_ESP32)
+#elif defined(BRD_ESP32)
 // ESP32
 #define PIN_SS 5
 #define PIN_RST 14

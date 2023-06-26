@@ -6,18 +6,20 @@ const int N_NODES = 4; // for experiment purposes, the number of nodes is harcod
 class RoutingTable {
   public:
     RoutingTable();
-    RoutingTable(String);
+    RoutingTable(const String);
     
-    void set_nodeId(int);
-    void set(RoutingTable);
-    void set(String);
+    void setNodeId(const int);
+    int getNodeId() const;
 
-    void update(RoutingTable, int);
-    void update(String, int);
+    void set(const RoutingTable&);
+    void set(const String);
 
-    String get_to_string();
-    void print();
+    void update(RoutingTable, const int);
+    void update(const String, const int);
 
+    String toString();
+
+    Routing routings[N_NODES]; // it is assumed that each NODEID is defined incrementally from 1 to N_NODES, hence it will be stored in routings[NODEID-1].n = NODEID. This redundancy is not anticipated at start, so oh well
+  private:
     int nodeId;
-    Routing routings[N_NODES];
 };

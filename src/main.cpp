@@ -27,11 +27,10 @@ void loraSetup() {
 }
 
 void routingTableSetup() {
-  routingTable.set_nodeId(nodeId);
+  routingTable.setNodeId(nodeId);
 
   Serial.println("=== Initial RoutingTable state ===");
-  routingTable.print();
-  Serial.println();
+  Serial.println(routingTable.toString());
 }
 
 void sendMsg(const String _msg) {
@@ -91,7 +90,7 @@ void loop() {
   recvMsg();
 
   if (millis() - lastSend > 5000) {
-    sendMsg(routingTable.get_to_string());
+    sendMsg(routingTable.toString());
     lastSend = millis();
   }
 }
