@@ -1,5 +1,4 @@
-#ifndef RoutingTable_h
-#define RoutingTable_h
+#pragma once
 
 #include "Routing.h"
 
@@ -22,5 +21,3 @@ class RoutingTable {
     int nodeId;
     Routing routings[N_NODES];
 };
-
-#endif
